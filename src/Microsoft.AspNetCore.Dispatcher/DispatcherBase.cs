@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
@@ -14,7 +13,7 @@ namespace Microsoft.AspNetCore.Dispatcher
     public abstract class DispatcherBase : IAddressCollectionProvider, IEndpointCollectionProvider
     {
         private List<Address> _addresses;
-        private List<Endpoint> _endpoints;
+        private IEndpointCollection _endpoints;
         private List<EndpointSelector> _endpointSelectors;
 
         public virtual IList<Address> Addresses
@@ -30,16 +29,21 @@ namespace Microsoft.AspNetCore.Dispatcher
             }
         }
 
-        public virtual IList<Endpoint> Endpoints
+        public virtual IEndpointCollection Endpoints
         {
             get
             {
                 if (_endpoints == null)
                 {
-                    _endpoints = new List<Endpoint>();
+                    _endpoints = new EndpointCollection(null, 0);
                 }
 
                 return _endpoints;
+            }
+
+            set
+            {
+                _endpoints = value;
             }
         }
 
@@ -60,7 +64,7 @@ namespace Microsoft.AspNetCore.Dispatcher
 
         IReadOnlyList<Address> IAddressCollectionProvider.Addresses => _addresses;
 
-        IReadOnlyList<Endpoint> IEndpointCollectionProvider.Endpoints => _endpoints;
+        IEndpointCollection IEndpointCollectionProvider.Endpoints => _endpoints;
 
         public virtual async Task InvokeAsync(HttpContext httpContext)
         {
@@ -78,17 +82,17 @@ namespace Microsoft.AspNetCore.Dispatcher
                     return;
                 }
 
-                var selectorContext = new EndpointSelectorContext(httpContext, Endpoints.ToList(), Selectors);
+                var selectorContext = new EndpointSelectorContext(httpContext, Endpoints, Selectors);
                 await selectorContext.InvokeNextAsync();
 
-                switch (selectorContext.Endpoints.Count)
+                switch (selectorContext.Endpoints.Items.Count)
                 {
                     case 0:
                         break;
 
                     case 1:
                         
-                        feature.Endpoint = selectorContext.Endpoints[0];
+                        feature.Endpoint = selectorContext.Endpoints.Items[0];
                         break;
 
                     default:

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -37,14 +38,14 @@ namespace DispatcherSample
                         new DispatcherValueAddress(new { controller = "Admin", action = "Index", }, new object[]{ new RouteTemplateMetadata("{controller=Home}/{action=Index}/{id?}"), }, "Admin:Index()"),
                         new DispatcherValueAddress(new { controller = "Admin", action = "Users", }, new object[]{ new RouteTemplateMetadata("{controller=Home}/{action=Index}/{id?}"), }, "Admin:GetUsers()/Admin:EditUsers()"),
                     },
-                    Endpoints =
+                    Endpoints = new EndpointCollection(new List<Endpoint>
                     {
                         new SimpleEndpoint(Home_Index, Array.Empty<object>(), new { controller = "Home", action = "Index", }, "Home:Index()"),
                         new SimpleEndpoint(Home_About, Array.Empty<object>(), new { controller = "Home", action = "About", }, "Home:About()"),
                         new SimpleEndpoint(Admin_Index, Array.Empty<object>(), new { controller = "Admin", action = "Index", }, "Admin:Index()"),
                         new SimpleEndpoint(Admin_GetUsers, new object[] { new HttpMethodMetadata("GET"), new AuthorizationPolicyMetadata("Admin"), }, new { controller = "Admin", action = "Users", }, "Admin:GetUsers()"),
                         new SimpleEndpoint(Admin_EditUsers, new object[] { new HttpMethodMetadata("POST"), new AuthorizationPolicyMetadata("Admin"), }, new { controller = "Admin", action = "Users", }, "Admin:EditUsers()"),
-                    },
+                    }, 0),
                     Selectors =
                     {
                         new DispatcherValueEndpointSelector(),

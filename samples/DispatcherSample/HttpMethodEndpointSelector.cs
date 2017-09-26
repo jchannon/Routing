@@ -20,9 +20,9 @@ namespace DispatcherSample
             var snapshot = context.CreateSnapshot();
 
             var fallback = new List<Endpoint>();
-            for (var i = context.Endpoints.Count - 1; i >= 0; i--)
+            for (var i = context.Endpoints.Items.Count - 1; i >= 0; i--)
             {
-                var endpoint = context.Endpoints[i];
+                var endpoint = context.Endpoints.Items[i];
                 IHttpMethodMetadata metadata = null;
 
                 for (var j = endpoint.Metadata.Count - 1; j >= 0; j--)
@@ -38,7 +38,7 @@ namespace DispatcherSample
                 {
                     // No metadata.
                     fallback.Add(endpoint);
-                    context.Endpoints.RemoveAt(i);
+                    context.Endpoints.Items.RemoveAt(i);
                 }
                 else if (Matches(metadata, context.HttpContext.Request.Method))
                 {
@@ -47,7 +47,7 @@ namespace DispatcherSample
                 else
                 {
                     // Not a match.
-                    context.Endpoints.RemoveAt(i);
+                    context.Endpoints.Items.RemoveAt(i);
                 }
             }
 
@@ -55,15 +55,15 @@ namespace DispatcherSample
             // request.
             await context.InvokeNextAsync();
 
-            if (context.Endpoints.Count == 0)
+            if (context.Endpoints.Items.Count == 0)
             {
                 // Nothing matched, do the fallback.
                 context.RestoreSnapshot(snapshot);
-                context.Endpoints.Clear();
+                context.Endpoints.Items.Clear();
 
                 for (var i = 0; i < fallback.Count; i++)
                 {
-                    context.Endpoints.Add(fallback[i]);
+                    context.Endpoints.Items.Add(fallback[i]);
                 }
 
                 await context.InvokeNextAsync();

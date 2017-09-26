@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Dispatcher
     {
         private int _index;
 
-        public EndpointSelectorContext(HttpContext httpContext, IList<Endpoint> endpoints, IList<EndpointSelector> selectors)
+        public EndpointSelectorContext(HttpContext httpContext, IEndpointCollection endpoints, IList<EndpointSelector> selectors)
         {
             if (httpContext == null)
             {
@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Dispatcher
             Selectors = selectors; 
         }
 
-        public IList<Endpoint> Endpoints { get; }
+        public IEndpointCollection Endpoints { get; }
 
         public HttpContext HttpContext { get; }
 
@@ -54,7 +54,7 @@ namespace Microsoft.AspNetCore.Dispatcher
 
         public Snapshot CreateSnapshot()
         {
-            return new Snapshot(_index, Endpoints);
+            return new Snapshot(_index, Endpoints.Items);
         }
 
         public void RestoreSnapshot(Snapshot snapshot)
@@ -77,10 +77,10 @@ namespace Microsoft.AspNetCore.Dispatcher
             {
                 context._index = _index;
 
-                context.Endpoints.Clear();
+                context.Endpoints.Items.Clear();
                 for (var i = 0; i < _endpoints.Length; i++)
                 {
-                    context.Endpoints.Add(_endpoints[i]);
+                    context.Endpoints.Items.Add(_endpoints[i]);
                 }
             }
         }
